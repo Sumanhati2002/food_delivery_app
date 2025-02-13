@@ -29,7 +29,7 @@ class HomePage1 extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,7 +157,6 @@ class HomePage1 extends StatelessWidget{
                   rating: 4.5,
                   isEcoFriendly: true,
                 )
-                // Add more restaurant cards...
               ],
             ),
           ),

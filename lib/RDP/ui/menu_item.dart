@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:food_delivery_app/cart_model.dart';
+import 'package:food_delivery_app/provider/cart.dart';
+import 'package:provider/provider.dart';
 
 class MenuItemCard extends StatefulWidget {
-  final String title;
-  final String price;
-  final String rating;
-  final String reviews;
-  final String description;
-  final String imageUrl;
   final Function(int, double) onCartUpdate;
+  final ProductModel? model;
 
   const MenuItemCard({
     super.key,
-    required this.title,
-    required this.price,
-    required this.rating,
-    required this.reviews,
-    required this.description,
-    required this.imageUrl,
+    this.model,
     required this.onCartUpdate,
   });
 
@@ -25,11 +18,16 @@ class MenuItemCard extends StatefulWidget {
 }
 
 class _MenuItemCardState extends State<MenuItemCard> {
-  int count = 0; // Counter state
+
 
   @override
   Widget build(BuildContext context) {
-    double itemPrice = double.parse(widget.price.replaceAll("₹", ""));
+    double itemPrice = widget.model?.price ?? 0;
+    int itemRating = widget.model?.rating ?? 0;
+    final cartItem = context.watch<CartStore>().cartItem;
+    final particulatItem =
+        cartItem.where((element) => element.sku == widget.model?.sku).toList();
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -67,7 +65,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      widget.title,
+                      widget.model?.title ?? '',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -77,7 +75,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  widget.price,
+                  '${itemPrice}' ,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -87,9 +85,12 @@ class _MenuItemCardState extends State<MenuItemCard> {
                 Row(
                   children: [
                     Icon(Icons.star, size: 16, color: Colors.amber[700]),
+                    Icon(Icons.star, size: 16, color: Colors.amber[700]),
+                    Icon(Icons.star, size: 16, color: Colors.amber[700]),
+                    Icon(Icons.star, size: 16, color: Colors.amber[700]),
                     const SizedBox(width: 4),
                     Text(
-                      widget.rating,
+                      "${itemRating}",
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -97,7 +98,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '(${widget.reviews})',
+                      '()',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],
@@ -126,7 +127,7 @@ class _MenuItemCardState extends State<MenuItemCard> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  widget.description,
+                  widget.model?.description ?? 'avdav',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -141,20 +142,17 @@ class _MenuItemCardState extends State<MenuItemCard> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  widget.imageUrl,
+                  widget.model?.image ?? '',
                   width: 100,
                   height: 100,
                   fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(height: 8),
-              count == 0
+              particulatItem?.isEmpty == true
                   ? ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                          count = 1;
-                        });
-                        widget.onCartUpdate(1, itemPrice); // Add item to cart
+                        context.read<CartStore>().addToCart(widget.model!);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -177,20 +175,12 @@ class _MenuItemCardState extends State<MenuItemCard> {
                         children: [
                           IconButton(
                             onPressed: () {
-                              setState(() {
-                                if (count > 1) {
-                                  count--;
-                                } else {
-                                  count = 0; // Reset to "ADD" button
-                                }
-                              });
-                              widget.onCartUpdate(
-                                  -1, itemPrice); // Remove item from cart
+                              context.read<CartStore>().removeFromCart(widget.model!); // Remove item from cart
                             },
                             icon: const Icon(Icons.remove, color: Colors.pink),
                           ),
                           Text(
-                            '$count',
+                            '${particulatItem?.first.quanity}',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -198,11 +188,10 @@ class _MenuItemCardState extends State<MenuItemCard> {
                           ),
                           IconButton(
                             onPressed: () {
-                              setState(() {
-                                count++;
-                              });
-                              widget.onCartUpdate(
-                                  1, itemPrice); // Add item to cart
+                              context
+                                  .read<CartStore>()
+                                  .addToCart(widget.model!);
+                              // Add item to cart
                             },
                             icon: const Icon(Icons.add, color: Colors.pink),
                           ),
